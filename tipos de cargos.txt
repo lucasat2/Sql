@@ -1,0 +1,3 @@
+engenharia de dados - coleta de dados 
+analise de dados: olha para o passado
+ciencia de dados - olha para o futuro , construir algoritmo de machine learning e ia.
