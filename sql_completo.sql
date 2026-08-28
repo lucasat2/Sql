@@ -367,8 +367,182 @@ ORDER BY sum(vlProduto * QtdeProduto) DESC
 
 --                                                        JOINS
 
+SELECT t1.*,
+       t2.DescDescricaoProduto
+
+FROM transacao_produto AS t1
+
+LEFT JOIN produtos AS t2
+ON t1.IdProduto = t2.IdProduto
+
+limit 10
 
 
+-- Qual categoria tem mais produtos vendidos? 
+
+SELECT 
+       t2.DescCategoriaProduto 
+       count(DISTINCT t1.IdTransacao)
+
+FROM transacao_produto AS t1
+
+LEFT JOIN produtos AS t2
+ON t1.IdProduto = t2.IdProduto 
+
+GROUP BY t2.DescCategoriaProduto
+ORDER BY count(DISTINCT t1.IdTransacao) DESC
+
+
+-- Em 2024, quantas transacoes de lovers tivemos?
+
+SELECT COUNT(DISTINCT t1.IdTransacao)
+
+FROM transacoes AS t1
+
+LEFT JOIN transacao_produto AS t2
+ON t1.IdTransacao = t2.IdTransacao
+
+LEFT JOIN produtos AS t3
+ON t2.IdProduto = t3.IdProduto
+
+WHERE t1.DtCriacao >= '2024-01-01' AND t1.DtCriacao < '2025-01-01'
+AND t3.DescCategoriaProduto = 'lovers'
+GROUP BY t3.DescCategoriaProduto
+
+
+-- Qual mês tivemos mais lista de presença assinada?
+
+SELECT
+
+substr(t1.DtCriacao, 1, 7) AS anoMes,
+count(distinct t1.IdTransacao) AS qtdeTransacao
+
+FROM transacoes AS t1
+
+LEFT JOIN transacao_produto AS t2
+ON t1. IdTransacao = t2. IdTransacao
+
+LEFT JOIN produtos AS t3
+ON t2. IdProduto = t3. IdProduto
+
+WHERE t3.DescProduto = 'Lista de presenca'
+
+GROUP BY substr(t1.DtCriacao, 1, 7)
+ORDER BY qtdeTransacao DESC
+
+
+
+
+-- Quais clientes mais perderam pontos por Lover?
+
+SELECT t1. IdCliente,
+sum(t1. QtdePontos) AS totalPontos
+
+FROM transacoes AS t1
+
+LEFT JOIN transacao_produto AS t2
+ON t1. IdTransacao = t2. IdTransacao
+
+LEFT JOIN produtos AS t3
+ON t2. IdProduto = t3. IdProduto
+
+WHERE t3.DescCateogriaProduto = 'lovers'
+
+GROUP BY t1. IdCliente
+
+ORDER BY sum(t1. QtdePontos) ASC
+
+LIMIT 5
+
+
+-- Quais clientes assinaram a lista de presença no dia 2025/08/25?
+
+SELECT t1. IdCliente,
+count(*)
+
+FROM transacoes AS t1
+
+LEFT JOIN transacao_produto AS t2
+ON t1. IdTransacao = t2.IdTransacao
+
+LEFT JOIN produtos AS t3
+ON t2. IdProduto = t3. IdProduto
+
+WHERE substr(t1.DtCriacao, 1,10) = '2025-08-25'
+AND t3.DescProduto = 'Lista de presença'
+
+GROUP BY t1.IdCliente
+
+-- Do inicio ao fim do nosso curso (2025/08/25 a 2025/08/29),
+-- quantos clientes assinaram a lista de presença?
+
+SELECT count(DISTINCT t1.Idcliente)
+
+FROM transacoes AS t1
+
+LEFT JOIN transacao_produto AS t2
+ON t1.IdTransacao = t2.IdTransacao
+
+LEFT JOIN produtos AS t3
+ON t2.IdProduto = t3.IdProduto
+
+WHERE t1.DtCriacao >= '2025-08-25'
+AND t1.DtCriacao < '2025-08-30'
+AND t3.DescNomeProduto = 'Lista de presença'
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+--                                                        SUBQUERIES
+
+SELECT count(DISTINCT idCliente)
+
+FROM transacoes AS t1
+
+WHERE t1.idCliente IN (
+
+        SELECT DISTINCT idCliente 
+        FROM transacoes 
+        WHERE substr(DtCriacao,1,10) = '2025-08-25'
+
+)
+AND  substr(t1.DtCriacao,1,10) = '2025-08-29'
+
+----------CTE
+
+
+WITH tb_cliente_primeiro_dia AS (
+SELECT DISTINCT IdCliente
+FROM transacoes
+WHERE substr(dtCriacao,1,10) = '2025-08-25'
+
+),
+
+tb_cliente_ultimo_dia AS (
+SELECT DISTINCT IdCliente
+FROM transacoes
+WHERE substr(dtCriacao,1,10) = '2025-08-29'
+
+),
+
+tb_join AS (
+
+        SELECT t1.idCliente AS primCliente,
+               t2.idCliente AS ultCliente
+
+        FROM tb_cliente_primeiro_dia AS t1
+
+        LEFT JOIN tb_cliente_ultimo_dia AS t2
+        ON t1. IdCliente = t2.IdCliente
+)
+
+SELECT count(primCliente),
+       count(ultCliente),
+       1. * count(ultCliente) / (primCliente)
+
+FROM tb_join
 
 
 
