@@ -2,7 +2,8 @@ CREATE TABLE clientes (
     id INTEGER PRIMARY KEY,
     nome TEXT NOT NULL,
     idade INTEGER,
-    cidade TEXT
+    cidade TEXT,
+    email TEXT
 );
 
 CREATE TABLE produtos (
